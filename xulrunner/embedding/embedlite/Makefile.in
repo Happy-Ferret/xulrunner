@@ -1,0 +1,104 @@
+# 
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+DEPTH           = @DEPTH@
+topsrcdir       = @top_srcdir@
+srcdir          = @srcdir@
+VPATH           = @srcdir@
+relativesrcdir  = @relativesrcdir@
+VPATH += \
+  $(srcdir) \
+  $(srcdir)/embedhelpers \
+  $(srcdir)/utils \
+  $(srcdir)/embedthread \
+  $(srcdir)/modules \
+  $(NULL)
+
+include $(DEPTH)/config/autoconf.mk
+
+MODULE_NAME = embedlite
+GRE_MODULE = 1
+
+LIBXUL_LIBRARY = 1
+EXPORT_LIBRARY = 1
+IS_COMPONENT = 1
+
+LIBRARY_NAME = embedlite
+
+ifndef _MSC_VER
+FAIL_ON_WARNINGS := 1
+endif # !_MSC_VER
+
+EXPORTS_NAMESPACES = mozilla/embedlite IPC
+EXPORTS_mozilla/embedlite = \
+    EmbedInitGlue.h \
+    EmbedLiteAPI.h \
+    EmbedLiteApp.h \
+    EmbedLiteView.h \
+    EmbedLog.h \
+    $(NULL)
+
+EXPORTS_IPC = \
+    InputDataIPC.h \
+    $(NULL)
+
+CPPSRCS = \
+    EmbedLiteApp.cpp \
+    EmbedLiteUILoop.cpp \
+    EmbedLiteSubThread.cpp \
+    EmbedLiteAppThread.cpp \
+    EmbedLiteAppThreadParent.cpp \
+    EmbedLiteAppThreadChild.cpp \
+    EmbedLiteView.cpp \
+    EmbedLiteViewThreadParent.cpp \
+    EmbedLiteViewThreadChild.cpp \
+    EmbedLitePuppetWidget.cpp \
+    EmbedLiteCompositorParent.cpp \
+    TabChildHelper.cpp \
+    EmbedTabChildGlobal.cpp \
+    WebBrowserChrome.cpp \
+    GeckoLoader.cpp \
+    DirProvider.cpp \
+    WindowCreator.cpp \
+    EmbedLog.cpp \
+    EmbedLiteAppService.cpp \
+    EmbedLiteJSON.cpp \
+    EmbedLiteModulesService.cpp \
+    EmbedLiteXulAppInfo.cpp \
+    $(NULL)
+
+LOCAL_INCLUDES += \
+    -I$(srcdir)/utils \
+    -I$(srcdir)/modules \
+    -I$(srcdir)/embedhelpers \
+    -I$(srcdir)/embedthread \
+    -I$(topsrcdir)/widget/xpwidgets \
+    -I$(topsrcdir)/dom/base \
+    -I$(topsrcdir)/dom/ipc \
+    -I$(topsrcdir)/js/xpconnect/src \
+    $(NULL)
+
+DEFINES += -DEMBED_LITE_INTERNAL=1
+
+DEFINES += \
+  -DOS_TARGET=\"$(OS_TARGET)\" \
+  -DMOZ_WIDGET_TOOLKIT=\"$(MOZ_WIDGET_TOOLKIT)\"
+
+ifdef TARGET_XPCOM_ABI
+DEFINES += \
+  -DTARGET_XPCOM_ABI=\"$(TARGET_XPCOM_ABI)\" \
+  -DTARGET_OS_ABI=\"$(OS_TARGET)_$(TARGET_XPCOM_ABI)\" \
+  $(NULL)
+endif
+
+PREF_JS_EXPORTS = $(srcdir)/embedding.js
+
+GRE_BUILDID := $(shell cat $(DEPTH)/config/buildid)
+DEFINES += \
+  -DGRE_BUILDID=\"$(GRE_BUILDID)\"
+
+include $(topsrcdir)/config/config.mk
+include $(topsrcdir)/config/rules.mk
+include $(topsrcdir)/ipc/chromium/chromium-config.mk
